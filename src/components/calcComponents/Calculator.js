@@ -1,19 +1,18 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import KeyBoard from './KeyBoard';
 
 export class Calculator extends Component {
   render() {
     return (
       <View style={styles.container}>
         <View style={styles.inputField}>
-        
+          
         </View>
         <View style={styles.navBar}>
         
         </View>
-        <View style={styles.keyPad}>
-        
-        </View>
+        <KeyBoard />
       </View>
     )
   }
@@ -22,20 +21,22 @@ export class Calculator extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: 'lightyellow',
+        backgroundColor: '#000',
     },
     inputField: {
         flex: 3,
-        backgroundColor: 'blue',
+        backgroundColor: '#fff',
+        borderBottomLeftRadius: 1,
+        borderColor: '#000',
+        borderWidth: 1,
     },
     navBar: {
         flex: 1,
-        backgroundColor: 'green',
-    },
-    keyPad: {
-        flex: 5,
-        backgroundColor: 'purple',
+        backgroundColor: 'lightgray',
+        borderBottomLeftRadius: 1,
+        borderColor: '#000',
+        borderWidth: 1,
     }
 })
 
-export default Calculator
+export default Calculator;
