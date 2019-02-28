@@ -8,19 +8,22 @@ export class Calculator extends Component {
         super(props);
 
         this.state = {
-            keyboardButtons: ['C', '( )', '%', '÷',
-                 '7', '8', '9', 'x',
-                 '4', '5', '6', '-',
-                 '1', '2', '3', '+',
-                 '+/-', '0', '.', '=',
-
-            ],
+            keyboardButtons:
+                 ['C', '( )', '%', '÷',
+                 7, 8, 9, 'x',
+                 4, 5, 6, '-',
+                 1, 2, 3, '+',
+                 '+/-', 0, '.', '=',],
+            
+            
             input: 'Hello from Screen.js',
         };
     }
 
     handleClick(i) {
-        ToastAndroid.show('Clicked' + i.btnValue, ToastAndroid.SHORT)
+        this.setState({
+            input: this.state.keyboardButtons[i]
+        })
     }
 
   render() {
