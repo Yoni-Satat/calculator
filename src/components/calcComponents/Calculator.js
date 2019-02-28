@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ToastAndroid } from 'react-native';
 import KeyBoard from './KeyBoard';
+import Screen from './Screen';
 
 export class Calculator extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {input: 'Hello from Screen.js'};
+    }
+
   render() {
     return (
       <View style={styles.container}>
-        <View style={styles.inputField}>
-          
-        </View>
+        <Screen input={this.state.input} />
         <View style={styles.navBar}>
         
         </View>
@@ -22,13 +27,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#000',
-    },
-    inputField: {
-        flex: 3,
-        backgroundColor: '#fff',
-        borderBottomLeftRadius: 1,
-        borderColor: '#000',
-        borderWidth: 1,
     },
     navBar: {
         flex: 1,
