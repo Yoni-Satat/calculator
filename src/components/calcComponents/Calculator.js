@@ -7,7 +7,20 @@ export class Calculator extends Component {
     constructor(props) {
         super(props);
 
-        this.state = {input: 'Hello from Screen.js'};
+        this.state = {
+            keyboardButtons: ['C', '( )', '%', '÷',
+                 '7', '8', '9', 'x',
+                 '4', '5', '6', '-',
+                 '1', '2', '3', '+',
+                 '+/-', '0', '.', '=',
+
+            ],
+            input: 'Hello from Screen.js',
+        };
+    }
+
+    handleClick(i) {
+        ToastAndroid.show('Clicked' + i.btnValue, ToastAndroid.SHORT)
     }
 
   render() {
@@ -17,7 +30,10 @@ export class Calculator extends Component {
         <View style={styles.navBar}>
         
         </View>
-        <KeyBoard />
+        <KeyBoard
+          keyboardButtons={this.state.keyboardButtons}
+          onPress={(i) => this.handleClick(i)}
+        />
       </View>
     )
   }

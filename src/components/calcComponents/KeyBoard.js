@@ -4,38 +4,47 @@ import SingleKey from './SingleKey';
 
 export class KeyBoard extends Component {
 
+  renderKey(i) {
+    return(
+      <SingleKey
+        value={this.props.keyboardButtons[i]}
+        onPress={(i) => this.props.onPress(i)}
+      />
+    )
+  }
+
   render() {
     return (
       <View style={styles.keyBoard}>
         <View style={styles.boardRow}>
-          <SingleKey title='C' />
-          <SingleKey title='()'/>
-          <SingleKey title='%' />
-          <SingleKey title='÷' />
+          {this.renderKey(0)}
+          {this.renderKey(1)}
+          {this.renderKey(2)}
+          {this.renderKey(3)}
         </View>
         <View style={styles.boardRow}>
-          <SingleKey title='7' />
-          <SingleKey title='8'/>
-          <SingleKey title='9' />
-          <SingleKey title='X' />
+          {this.renderKey(4)}
+          {this.renderKey(5)}
+          {this.renderKey(6)}
+          {this.renderKey(7)}
         </View>
         <View style={styles.boardRow}>
-          <SingleKey title='4' />
-          <SingleKey title='5'/>
-          <SingleKey title='6' />
-          <SingleKey title='-' />
+          {this.renderKey(8)}
+          {this.renderKey(9)}
+          {this.renderKey(10)}
+          {this.renderKey(11)}
         </View>
         <View style={styles.boardRow}>
-          <SingleKey title='1' />
-          <SingleKey title='2'/>
-          <SingleKey title='3' />
-          <SingleKey title='+' />
+          {this.renderKey(12)}
+          {this.renderKey(13)}
+          {this.renderKey(14)}
+          {this.renderKey(15)}
         </View>
         <View style={styles.boardRow}>
-          <SingleKey title='+/-' />
-          <SingleKey title='0'/>
-          <SingleKey title='.' />
-          <SingleKey title='=' />
+          {this.renderKey(16)}
+          {this.renderKey(17)}
+          {this.renderKey(18)}
+          {this.renderKey(19)}
         </View>
       </View>
     )

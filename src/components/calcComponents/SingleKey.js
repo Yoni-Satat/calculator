@@ -1,16 +1,11 @@
 import React, { Component } from 'react';
-import {Text, StyleSheet, TouchableOpacity, ToastAndroid } from 'react-native';
+import {Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 export class SingleKey extends Component {
-
-    handleClick = () => {
-        ToastAndroid.show('clicked: ' + this.props.title, ToastAndroid.SHORT)
-    }
-
-  render() {
+    render() {
     return (
-        <TouchableOpacity style={styles.btn} onPress={this.handleClick}>
-            <Text>{this.props.title}</Text>
+        <TouchableOpacity style={styles.btn} onPress={() => this.props.onPress()}>
+            <Text>{this.props.value}</Text>
         </TouchableOpacity>
     )
   }
