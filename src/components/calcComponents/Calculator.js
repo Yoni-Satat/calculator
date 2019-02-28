@@ -6,7 +6,6 @@ import Screen from './Screen';
 export class Calculator extends Component {
     constructor(props) {
         super(props);
-
         this.state = {
             keyboardButtons:
                  ['C', '( )', '%', '÷',
@@ -15,21 +14,27 @@ export class Calculator extends Component {
                  1, 2, 3, '+',
                  '+/-', 0, '.', '=',],
             
-            
-            input: 'Hello from Screen.js',
+                screen: []
         };
     }
 
     handleClick(i) {
-        this.setState({
-            input: this.state.keyboardButtons[i]
-        })
+        const keyValue = this.state.keyboardButtons[i];
+        if(keyValue[i] === 'C') {
+            this.setState({
+                screen: []
+            })
+        } else {
+            this.setState({
+                screen: [...this.state.screen, keyValue]
+            })
+        }         
     }
 
   render() {
     return (
       <View style={styles.container}>
-        <Screen input={this.state.input} />
+        <Screen input={this.state.screen} />
         <View style={styles.navBar}>
         
         </View>
