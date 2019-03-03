@@ -3,9 +3,13 @@ import {Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 export class SingleKey extends Component {
     render() {
+        const button = {
+            id: this.props.id,
+            btn: this.props.btn
+        }
     return (
-        <TouchableOpacity style={styles.btn} onPress={() => this.props.onPress()}>
-            <Text>{this.props.value}</Text>
+        <TouchableOpacity value={button} style={styles.btn} onPress={() => this.props.onPress()}>
+            <Text>{this.props.value.btn}</Text>
         </TouchableOpacity>
     )
   }
