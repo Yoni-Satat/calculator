@@ -15,59 +15,39 @@ export class Calculator extends Component {
                 {id: 'num1', btn: 1}, {id: 'num2', btn: 2}, {id: 'num3', btn: 3}, {id: 'ADD', btn: '+'},
                 {id: 'PER', btn: '%'}, {id: 'num0', btn: 0}, {id: 'DOT', btn: '.'}, {id: 'EQU', btn: '='},
               ],
-            isNumber: false,
-            monitor: [],
-            runningToatl: Number,
-            lastValue: [],
+            previousOperartor: null,
+            previousTotal: 0,
+            newTotal: true,
+            runningToatl: 0,
+            monitor: [],            
         };
-    } 
+    }
 
     handleClick(i) {
-        const keyValue = this.state.keyboardButtons[i];
-        const monitor = this.state.monitor.slice();
-        const lastInMonitor = this.state.monitor[this.state.monitor.length - 1];
-        const lastIndexInMonitor = this.state.monitor.indexOf(lastInMonitor);
+        const button = this.state.keyboardButtons[i];
+        const keyType = typeof(button.btn);
+        
+        if(keyType === 'number') {
+            this.handleNunber(i)
+        } else {
+            this.handleOperator(i)
+        } 
+    }
 
-        switch(keyValue.btn) {
-            case 'C':
-                this.setState({monitor: [], runningToatl: Number});
-            break;
-            case '=':
-                ToastAndroid.show('display toatl', ToastAndroid.SHORT);
-            break;
-            case '-':
-            case '+':
-            case 'x':
-            case '÷':
-                if(lastInMonitor === undefined) {
-                    return;
-                }
+    handleNunber(i) {
+        const button = this.state.keyboardButtons[i];
+        const keyValue = button.btn;
+        console.log(keyValue)
+    }
 
-                if(typeof(lastInMonitor) === 'number') {
-                    this.setState({
-                        monitor: [...this.state.monitor, keyValue.btn]
-                    });
-                }
-                
-                if(lastInMonitor === 'x' || lastInMonitor === '+' || lastInMonitor === '-' || lastInMonitor === '÷') {
-                    console.log(lastIndexInMonitor);
-                    monitor[lastIndexInMonitor] = keyValue.btn;
-                    this.setState({
-                        monitor: monitor  
-                    });
-                }
-                
-            break;
-            default:
-            this.setState({
-                monitor: [...this.state.monitor, keyValue.btn],
-                lastValue: [keyValue.id]
-            });
-                
-        }
+    handleOperator(i) {
+        const button = this.state.keyboardButtons[i];
+        const keyValue = button.btn;
+        console.log(keyValue)
     }
 
   render() {
+    
     return (
       <View style={styles.container}>
         <Screen input={this.state.monitor} />
