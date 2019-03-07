@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 export class Screen extends Component {
   render() {
     return (
-      <View style={styles.inputField}>
+      <View style={styles.monitor}>
           <Text>
             {this.props.input}
           </Text>
@@ -14,8 +14,8 @@ export class Screen extends Component {
 }
 
 const styles = StyleSheet.create({
-    inputField: {
-        flex: 3,
+    monitor: {
+        flex: 1.6,
         backgroundColor: '#fff',
         borderBottomLeftRadius: 1,
         borderColor: '#000',
@@ -23,6 +23,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    runningTotal: {
+        flex: 1,
+        backgroundColor: '#fff',
+        borderBottomLeftRadius: 1,
+        borderColor: '#000',
+        borderWidth: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
 })
 
 export default Screen;
