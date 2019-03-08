@@ -14,8 +14,7 @@ export class Calculator extends Component {
                 {id: 'num4', btn: 4}, {id: 'num5', btn: 5}, {id: 'num6', btn: 6}, {id: 'MIN', btn: '-'},
                 {id: 'num1', btn: 1}, {id: 'num2', btn: 2}, {id: 'num3', btn: 3}, {id: 'ADD', btn: '+'},
                 {id: 'PER', btn: '%'}, {id: 'num0', btn: 0}, {id: 'DOT', btn: '.'}, {id: 'EQU', btn: '='},
-              ],
-            newTotal: true,
+              ],           
             monitor: {
                 previousTotal: 0,
                 operator: '',
@@ -38,24 +37,13 @@ export class Calculator extends Component {
         } 
     }
 
-    checkLastValue(i) {
-        let arithmeticOperators = ['+','-','x','÷'];
-        let lastCharInDisplay = this.state.display1.slice(-1);
-        console.log(lastCharInDisplay);
-        arithmeticOperators.forEach((a) => {
-            if(a === lastCharInDisplay) {
-                this.updateOperator(i)
-            } 
-        });
-    }
-
     updateOperator(i) {
         const button = this.state.keyboardButtons[i];
         const keyValue = button.btn;
-        console.log('keyValue: ', keyValue)
         const operator = this.state.monitor.operator;
+        console.log('updating operator: ', keyValue)
         let display1 = this.state.display1;
-        if(operator === '+' || operator === '-' || operator === 'x' || operator === '÷') {
+        if(operator === '+' || operator === '-' ||  operator === 'x' || operator === '÷') {
             let operator = keyValue;
             display1 = display1.replace(/.$/, keyValue);
             this.setState({
@@ -65,6 +53,7 @@ export class Calculator extends Component {
                     runningToatl: this.state.monitor.runningToatl
                 },
                 display1: display1,
+                display2: this.state.display2,
             });
         }
     }
@@ -76,14 +65,13 @@ export class Calculator extends Component {
         const operator = monitor.operator;
         let runningToatl = monitor.runningToatl;
         let previousTotal = monitor.previousTotal;
-        const newTotal = this.state.newTotal;
         let display1 = this.state.display1;
         let display2 = this.state.display2;
                 
         if(keyValue === 'C') {
             this.resetCalculator();
         }
-        if(previousTotal === 0 && runningToatl === '') {
+        if(display1.length === 0) {
             return;
         }
 
@@ -93,7 +81,7 @@ export class Calculator extends Component {
                     this.updateOperator(i);
                 } else if(runningToatl === '') {                     
                     this.setState({
-                        newTotal: true,
+                        
                     monitor: {
                         previousTotal: previousTotal,
                         operator: keyValue,
@@ -105,7 +93,6 @@ export class Calculator extends Component {
                  } else {
                     previousTotal = previousTotal + parseFloat(runningToatl);
                     this.setState({
-                        newTotal: false,
                     monitor: {
                         previousTotal: previousTotal,
                         operator: keyValue,
@@ -121,7 +108,7 @@ export class Calculator extends Component {
                     this.updateOperator(i);
                 } else if(runningToatl === '') {                     
                     this.setState({
-                        newTotal: true,
+                        
                     monitor: {
                         previousTotal: previousTotal,
                         operator: keyValue,
@@ -134,7 +121,6 @@ export class Calculator extends Component {
                     previousTotal === 0 ? previousTotal = previousTotal + parseFloat(runningToatl) :
                                           previousTotal = previousTotal * parseFloat(runningToatl);
                     this.setState({
-                        newTotal: false,
                     monitor: {
                         previousTotal: previousTotal,
                         operator: keyValue,
@@ -148,38 +134,38 @@ export class Calculator extends Component {
             case '-':
                 if(display1.slice(-1) === '+' || display1.slice(-1) === '-' || display1.slice(-1) === 'x' || display1.slice(-1) === '÷') {
                     this.updateOperator(i);
-                } else if(runningToatl === '') {                     
+                }
+                if(operator !== '') {
+                    ToastAndroid.show('Operator found, yay!', ToastAndroid.SHORT);
+                    previousTotal = display2;
                     this.setState({
-                        newTotal: true,
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: keyValue,
-                        runningToatl: runningToatl + keyValue,                
-                    },
-                    display1: display1 + keyValue,
-                    display2: null,
+                        monitor: {
+                            previousTotal: previousTotal,
+                            operator: keyValue,
+                            runningToatl: '',
+                        },
+                        display1: display1 + keyValue,
+                        display2: null,
                     });
                 } else {
-                    previousTotal === 0 ? previousTotal = previousTotal + parseFloat(runningToatl) :
-                                          previousTotal = previousTotal - parseFloat(runningToatl);
+                    previousTotal = parseFloat(display1)
                     this.setState({
-                        newTotal: false,
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: keyValue,
-                        runningToatl: '',                
-                    },
-                    display1: display1 + keyValue,
-                    display2: null,
+                        monitor: {
+                            previousTotal: previousTotal,
+                            operator: keyValue,
+                            runningToatl: '',
+                        },
+                        display1: display1 + keyValue,
+                        display2: display2
                     });
-                }  
+                }
             break;
             case '÷':
                 if(display1.slice(-1) === '+' || display1.slice(-1) === '-' || display1.slice(-1) === 'x' || display1.slice(-1) === '÷') {
                     this.updateOperator(i);
                 } else if(runningToatl === '') {                     
                     this.setState({
-                        newTotal: true,
+                        
                     monitor: {
                         previousTotal: previousTotal,
                         operator: keyValue,
@@ -192,7 +178,6 @@ export class Calculator extends Component {
                     previousTotal === 0 ? previousTotal = previousTotal + parseFloat(runningToatl) :
                                           previousTotal = previousTotal / parseFloat(runningToatl);
                     this.setState({
-                        newTotal: false,
                     monitor: {
                         previousTotal: previousTotal,
                         operator: keyValue,
@@ -205,16 +190,16 @@ export class Calculator extends Component {
             break;
             case '=' :
                 console.log('total: ', display2, typeof(display2));
-                runningToatl = display2.toString();
-                console.log('runningTotal: ', runningToatl, typeof(runningToatl));
+                if(display2 === null) {
+                    return;
+                }
                 this.setState({
-                    newTotal: true,
                 monitor: {
-                    previousTotal: 0,
+                    previousTotal: display2,
                     operator: keyValue,
-                    runningToatl: runningToatl,                
+                    runningToatl: '',                
                 },
-                display1: runningToatl,
+                display1: display2.toString(),
                 display2: null,
                 });
             break;
@@ -227,52 +212,44 @@ export class Calculator extends Component {
     numberClick(i) {
         const button = this.state.keyboardButtons[i];
         const keyValue = button.btn;
-
         const monitor = this.state.monitor;        
         let operator = monitor.operator;
         let runningToatl = monitor.runningToatl;
         let previousTotal = monitor.previousTotal;
         let display1 = this.state.display1;
         let display2 = this.state.display2;
-        const newTotal = this.state.newTotal;
 
-        if(operator === '') {
-            console.log('---from numberClick---')
-            console.log('no operator')
-            runningToatl = runningToatl + keyValue;
-            display1 = display1 + keyValue;
-            this.setState({
-                newTotal: newTotal,
-                monitor: {
-                    previousTotal: previousTotal,
-                    operator: '',
-                    runningToatl: runningToatl,                
-                },
-                display1: display1,
-                display2: null,               
-            });
-        }
-        
         switch(operator) {
+            case '':
+                this.setState({
+                    monitor: {
+                        previousTotal: previousTotal,
+                        operator: operator,
+                        runningToatl: runningToatl,                
+                    },
+                    display1: display1 + keyValue,
+                    display2: display2,
+                });
+                
+            break;
             case '+':
-            runningToatl = runningToatl + keyValue;
-            display2 = previousTotal + parseFloat(runningToatl)
-            this.setState({
-                newTotal: !newTotal,
-                monitor: {
-                    previousTotal: previousTotal,
-                    operator: operator,
-                    runningToatl: runningToatl,                
-                },
-                display1: display1 + keyValue,
-                display2: display2,
-            });
+                runningToatl = runningToatl + keyValue;
+                display2 = previousTotal + parseFloat(runningToatl);
+                this.setState({
+                    monitor: {
+                        previousTotal: previousTotal,
+                        operator: operator,
+                        runningToatl: runningToatl,                
+                    },
+                    display1: display1 + keyValue,
+                    display2: display2,
+                });
             break;
             case '-':
                 runningToatl = runningToatl + keyValue;
-                display2 = previousTotal - parseFloat(runningToatl)
+                console.log('case - : ', runningToatl)
+                display2 = previousTotal - parseFloat(runningToatl);
                 this.setState({
-                    newTotal: !newTotal,
                     monitor: {
                         previousTotal: previousTotal,
                         operator: operator,
@@ -286,7 +263,6 @@ export class Calculator extends Component {
                 runningToatl = runningToatl + keyValue;
                 display2 = previousTotal * parseFloat(runningToatl)
                 this.setState({
-                    newTotal: !newTotal,
                     monitor: {
                         previousTotal: previousTotal,
                         operator: operator,
@@ -300,7 +276,6 @@ export class Calculator extends Component {
                 runningToatl = runningToatl + keyValue;
                 display2 = previousTotal / parseFloat(runningToatl)
                 this.setState({
-                    newTotal: !newTotal,
                     monitor: {
                         previousTotal: previousTotal,
                         operator: operator,
@@ -315,9 +290,10 @@ export class Calculator extends Component {
         }
     }
 
+
+
     resetCalculator() {
-        this.setState({
-            newTotal: true,
+        this.setState({            
             monitor: {
                 previousTotal: 0,
                 operator: '',
@@ -327,11 +303,14 @@ export class Calculator extends Component {
             display2: null,
         });
     }
-
-    
-
-    add(number) {
-        this.state.runningToatl = parseFloat(this.state.previousTotal) + parseFloat(number);
+    add(i) {
+        const button = this.state.keyboardButtons[i];
+        const keyValue = button.btn;
+        let runningToatl = this.state.monitor.runningToatl;
+        let previousTotal = this.state.monitor.previousTotal;
+        let display1 = this.state.display1;
+        let display2 = this.state.display2;
+        let operator = this.state.monitor.operator;
     }
 
     subtract(number) {
@@ -351,14 +330,18 @@ export class Calculator extends Component {
         const previousTotal = monitor.previousTotal;
         const operator = monitor.operator;
         const runningToatl = monitor.runningToatl;
-        const newTotal = this.state.newTotal;
+        const display1 = this.state.display1;
+        const display2 = this.state.display2;
         
         console.log('---------------------')
-        console.log('previousTotal: ', previousTotal);
-        console.log('operator: ' ,operator);
-        console.log('runningToatl: ', runningToatl);                       
-        console.log('newTotal: ', newTotal);
-        console.log('---------------------')
+        console.log('previousTotal: ', previousTotal, ', typeof: ', typeof(previousTotal));
+        console.log('operator: ', operator);
+        console.log('runningToatl: ', runningToatl, ', typeof: ', typeof(runningToatl)); 
+        console.log('---------------------');
+        console.log('display1: ', display1, ', typeof: ', typeof(display1));
+        console.log('display2: ', display2, ', typeof: ', typeof(display2));
+        console.log('---------------------');
+
     return (
       <View style={styles.container}>
         <Screen input={this.state.display1} style={styles.inputField} />
