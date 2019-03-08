@@ -6,6 +6,7 @@ import Screen from './Screen';
 export class Calculator extends Component {
     constructor(props) {
         super(props);
+        
         this.state = {
             keyboardButtons:
               [
@@ -128,6 +129,41 @@ export class Calculator extends Component {
         }
     }
 
+    updateTotal(i) {
+        const button = this.state.keyboardButtons[i];
+        const keyValue = button.btn;
+        const monitor = this.state.monitor;        
+        let operator = monitor.operator;
+        let runningToatl = monitor.runningToatl;
+        let previousTotal = monitor.previousTotal;
+        let display1 = this.state.display1;
+        let display2 = this.state.display2;
+
+        runningToatl = runningToatl + keyValue;
+        switch(operator) {
+            case '+':
+            display2 = previousTotal + parseFloat(runningToatl);
+            break;
+            case '-':
+            display2 = previousTotal - parseFloat(runningToatl);
+            break;
+            case 'x':
+            display2 = previousTotal * parseFloat(runningToatl);
+            break;
+            case '÷':
+            display2 = previousTotal / parseFloat(runningToatl);
+        }
+        this.setState({
+            monitor: {
+                previousTotal: previousTotal,
+                operator: operator,
+                runningToatl: runningToatl,                
+            },
+            display1: display1 + keyValue,
+            display2: display2,
+        });
+    }
+
     numberClick(i) {
         const button = this.state.keyboardButtons[i];
         const keyValue = button.btn;
@@ -152,63 +188,14 @@ export class Calculator extends Component {
                 
             break;
             case '+':
-                runningToatl = runningToatl + keyValue;
-                display2 = previousTotal + parseFloat(runningToatl);
-                this.setState({
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: operator,
-                        runningToatl: runningToatl,                
-                    },
-                    display1: display1 + keyValue,
-                    display2: display2,
-                });
-            break;
             case '-':
-                runningToatl = runningToatl + keyValue;
-                display2 = previousTotal - parseFloat(runningToatl);
-                this.setState({
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: operator,
-                        runningToatl: runningToatl,                
-                    },
-                    display1: display1 + keyValue,
-                    display2: display2,
-                });
-            break;
             case 'x':
-                runningToatl = runningToatl + keyValue;
-                display2 = previousTotal * parseFloat(runningToatl)
-                this.setState({
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: operator,
-                        runningToatl: runningToatl,                
-                    },
-                    display1: display1 + keyValue,
-                    display2: display2,
-                });
-            break;
             case '÷':
-                runningToatl = runningToatl + keyValue;
-                display2 = previousTotal / parseFloat(runningToatl)
-                this.setState({
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: operator,
-                        runningToatl: runningToatl,                
-                    },
-                    display1: display1 + keyValue,
-                    display2: display2,
-                });
+                this.updateTotal(i)              
             break;
-
             default:
         }
     }
-
-
 
     resetCalculator() {
         this.setState({            
