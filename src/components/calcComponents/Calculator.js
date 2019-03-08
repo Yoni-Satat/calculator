@@ -58,6 +58,8 @@ export class Calculator extends Component {
         }
     }
 
+
+
     operatorClick(i) {
         const button = this.state.keyboardButtons[i];
         const keyValue = button.btn;
@@ -77,66 +79,13 @@ export class Calculator extends Component {
 
         switch(keyValue) {
             case '+':
-                if(display1.slice(-1) === '+' || display1.slice(-1) === '-' || display1.slice(-1) === 'x' || display1.slice(-1) === '÷') {
-                    this.updateOperator(i);
-                } else if(runningToatl === '') {                     
-                    this.setState({
-                        
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: keyValue,
-                        runningToatl: runningToatl + keyValue,                
-                    },
-                    display1: display1 + keyValue,
-                    display2: null,
-                    });
-                 } else {
-                    previousTotal = previousTotal + parseFloat(runningToatl);
-                    this.setState({
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: keyValue,
-                        runningToatl: '',                
-                    },
-                    display1: display1 + keyValue,
-                    display2: null,
-                    });
-                 }     
-            break;
-            case 'x':
-                if(display1.slice(-1) === '+' || display1.slice(-1) === '-' || display1.slice(-1) === 'x' || display1.slice(-1) === '÷') {
-                    this.updateOperator(i);
-                } else if(runningToatl === '') {                     
-                    this.setState({
-                        
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: keyValue,
-                        runningToatl: runningToatl + keyValue,                
-                    },
-                    display1: display1 + keyValue,
-                    display2: null,
-                    });
-                } else {
-                    previousTotal === 0 ? previousTotal = previousTotal + parseFloat(runningToatl) :
-                                          previousTotal = previousTotal * parseFloat(runningToatl);
-                    this.setState({
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: keyValue,
-                        runningToatl: '',                
-                    },
-                    display1: display1 + keyValue,
-                    display2: null,
-                    });
-                }                
-            break;
             case '-':
+            case 'x':
+            case '÷':
                 if(display1.slice(-1) === '+' || display1.slice(-1) === '-' || display1.slice(-1) === 'x' || display1.slice(-1) === '÷') {
                     this.updateOperator(i);
                 }
                 if(operator !== '') {
-                    ToastAndroid.show('Operator found, yay!', ToastAndroid.SHORT);
                     previousTotal = display2;
                     this.setState({
                         monitor: {
@@ -158,52 +107,22 @@ export class Calculator extends Component {
                         display1: display1 + keyValue,
                         display2: display2
                     });
-                }
-            break;
-            case '÷':
-                if(display1.slice(-1) === '+' || display1.slice(-1) === '-' || display1.slice(-1) === 'x' || display1.slice(-1) === '÷') {
-                    this.updateOperator(i);
-                } else if(runningToatl === '') {                     
-                    this.setState({
-                        
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: keyValue,
-                        runningToatl: runningToatl + keyValue,                
-                    },
-                    display1: display1 + keyValue,
-                    display2: null,
-                    });
-                } else {
-                    previousTotal === 0 ? previousTotal = previousTotal + parseFloat(runningToatl) :
-                                          previousTotal = previousTotal / parseFloat(runningToatl);
-                    this.setState({
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: keyValue,
-                        runningToatl: '',                
-                    },
-                    display1: display1 + keyValue,
-                    display2: null,
-                    });
-                }           
+                } 
             break;
             case '=' :
-                console.log('total: ', display2, typeof(display2));
                 if(display2 === null) {
                     return;
                 }
                 this.setState({
                 monitor: {
                     previousTotal: display2,
-                    operator: keyValue,
+                    operator: '',
                     runningToatl: '',                
                 },
                 display1: display2.toString(),
                 display2: null,
                 });
-            break;
-            
+            break;            
             default:
             console.log('this btn is not yet included in handleOperator');
         }
@@ -247,7 +166,6 @@ export class Calculator extends Component {
             break;
             case '-':
                 runningToatl = runningToatl + keyValue;
-                console.log('case - : ', runningToatl)
                 display2 = previousTotal - parseFloat(runningToatl);
                 this.setState({
                     monitor: {
@@ -302,27 +220,6 @@ export class Calculator extends Component {
             display1: '',
             display2: null,
         });
-    }
-    add(i) {
-        const button = this.state.keyboardButtons[i];
-        const keyValue = button.btn;
-        let runningToatl = this.state.monitor.runningToatl;
-        let previousTotal = this.state.monitor.previousTotal;
-        let display1 = this.state.display1;
-        let display2 = this.state.display2;
-        let operator = this.state.monitor.operator;
-    }
-
-    subtract(number) {
-        this.state.runningToatl = parseFloat(this.state.previousTotal) - parseFloat(number);
-    }
-
-    multiply(number) {
-        this.state.runningToatl = parseFloat(this.state.previousTotal) * parseFloat(number);
-    }
-
-    divide(number) {
-        this.state.runningToatl = parseFloat(this.state.previousTotal) / parseFloat(number);
     }
 
   render() {
