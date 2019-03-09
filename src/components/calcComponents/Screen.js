@@ -5,9 +5,7 @@ export class Screen extends Component {
   render() {
     return (
       <View style={styles.monitor}>
-          <Text>
-            {this.props.input}
-          </Text>
+         <Text>{this.props.input}</Text>     
       </View>
     )
   }

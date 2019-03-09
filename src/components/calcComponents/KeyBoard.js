@@ -7,7 +7,7 @@ export class KeyBoard extends Component {
   renderKey(i) {
     return(
       <SingleKey
-        value={this.props.keyboardButtons[i]}
+        value={this.props.buttons[i]}
         onPress={() => this.props.onPress(i)}
       />
     )
