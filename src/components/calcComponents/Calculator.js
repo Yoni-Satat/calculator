@@ -32,142 +32,77 @@ export class Calculator extends Component {
     handleClick(i) {
         const button = this.buttons[i];
         const keyValue = button.btn;
-        const isNumber = parseFloat(keyValue);
         const history = this.state.history.slice(0, this.state.stepNumber + 1);
-        const current = history[history.length -1];        
-        let previousTotal = current.previousTotal;
-        let operator = current.operator;
-        let runningToatl = current.runningToatl;
-        let display1 = current.display1;
-        let display2 = current.display2;
-
-        if(!isNumber && display1 === '') {
+        const current = history[history.length -1];
+        if(current.display1.length === 0  && typeof(keyValue) !== 'number') {
             return;
-        }
+        } 
 
-        if(isNumber !== NaN) {
-            this.numberClick(i, current);
+        if(typeof(keyValue) === 'number' || keyValue === '.') {
+            const newMonitors = this.numberClick(i, current);
+            this.setState({
+                history: history.concat([                
+                        monitors = newMonitors
+                ]),
+                stepNumber: history.length,
+            });
         } else {
             this.operatorClick(i, current);
         } 
         
-        this.setState({
-            history: history.concat([                
-                    monitors = {
-                        previousTotal: current.previousTotal,
-                        operator: current.operator,
-                        runningToatl: current.runningToatl,
-                        display1: current.display1,
-                        display2: current.display2,
-                    }
-                
-            ]),
-            stepNumber: history.length,
-        });  
-        // if(keyType === 'number' || keyId === 'DOT') {
-        //     this.numberClick(i)
-        // } else {
-        //     this.operatorClick(i)
-        // } 
+        
     }
 
-    updateOperator(i) {
+    updateOperator(i, current) {
         const button = this.buttons[i];
         const keyValue = button.btn;
-        const operator = this.state.monitor.operator;
-        console.log('updating operator: ', keyValue)
-        let display1 = this.state.monitor.display1;
-        if(operator === '+' || operator === '-' ||  operator === 'x' || operator === '÷') {
-            let operator = keyValue;
-            display1 = display1.replace(/.$/, keyValue);
-            this.setState({
-                monitor: {
-                    previousTotal: this.state.monitor.previousTotal,
-                    operator: operator,
-                    runningToatl: this.state.monitor.runningToatl,                    
-                    display1: display1,
-                    display2: this.state.monitor.display2,
-                },
-            });
-        }
+        
+        console.log('update operator says that current is: ', current)
     }
 
 
 
-    operatorClick(i) {
+    operatorClick(i, current) {
         const button = this.buttons[i];
         const keyValue = button.btn;
+        let display1 = current.display1;
 
-        const monitor = this.state.monitor;   
-        const operator = monitor.operator;
-        let runningToatl = monitor.runningToatl;
-        let previousTotal = monitor.previousTotal;
-        let display1 = monitor.display1;
-        let display2 = monitor.display2;
-                
+        ToastAndroid.show('***OPERATOR CLICK***', ToastAndroid.SHORT)
         if(keyValue === 'C') {
             this.resetCalculator();
         }
-        if(display1.length === 0) {
-            return;
-        }
-
         switch(keyValue) {
             case '+':
             case '-':
             case 'x':
             case '÷':
                 if(display1.slice(-1) === '+' || display1.slice(-1) === '-' || display1.slice(-1) === 'x' || display1.slice(-1) === '÷') {
-                    this.updateOperator(i);
-                }
-                if(operator !== '') {
-                    previousTotal = display2;
-                    this.setState({
-                        monitor: {
-                            previousTotal: previousTotal,
-                            operator: keyValue,
-                            runningToatl: '',
-                            display1: display1 + keyValue,
-                            display2: null,
-                        },
-                    });
+                    this.updateOperator(i, current);
                 } else {
-                    previousTotal = parseFloat(display1)
-                    this.setState({
-                        monitor: {
-                            previousTotal: previousTotal,
-                            operator: keyValue,
-                            runningToatl: '',
-                            display1: display1 + keyValue,
-                            display2: display2
-                        },                       
-                    });
-                } 
-            break;
-            case '=' :
-                // if(display2 === null) {
-                //     return;
-                // }
-                this.setState({
-                    monitor: {
-                        previousTotal: display2,
-                        operator: '',
-                        runningToatl: '',
-                        display1: display2.toString(),
-                        display2: null,
-                    },
-                });
+                    current.previousTotal = parseFloat(current.runningToatl);
+                    current.operator = keyValue;
+                    current.runningToatl = '';
+                    current.display1 = display1 + keyValue;
+                    current.display2 = current.previousTotal;
+                }
             break;
             case 'del':
-                
+                this.delete();
             break;
             default:
-            console.log('this btn is not yet included in handleOperator');
         }
+        return current;
     }
 
-    delete({value}) {
-        this.setState({monitor: value.previousTotal})
+    delete() {
+        const history = this.state.history;
+        let stepNumber = this.state.stepNumber;
+        history.pop();
+        stepNumber = stepNumber - 1;
+        this.setState({
+            history: history,
+            stepNumber: stepNumber,
+        })
     }
 
     updateTotal(i) {
@@ -212,18 +147,24 @@ export class Calculator extends Component {
     numberClick(i, current) {
         const button = this.buttons[i];
         const keyValue = button.btn;
-        let previousTotal = current.previousTotal;
-        let operator = current.operator;
-        let runningToatl = current.runningToatl;
-        let display1 = current.display1;
-        let display2 = current.display2;
+        const operator = current.operator;
+        ToastAndroid.show('***NUMBER CLICK***', ToastAndroid.SHORT)
+        let newMonitors = {
+            previousTotal : current.previousTotal,
+            operator : current.operator,
+            runningToatl : current.runningToatl,
+            display1 : current.display1,
+            display2 : current.display2,
+        }
         switch(operator) {
             case '':
-                current.runningToatl = runningToatl + keyValue;
-                current.operator = operator;
-                current.previousTotal = previousTotal;
-                current.display1 = display1 + keyValue;
-                current.display2 = display2;             
+                newMonitors = {
+                    previousTotal : current.previousTotal,
+                    operator : current.operator,
+                    runningToatl : current.runningToatl + keyValue,
+                    display1 : current.display1 + keyValue,
+                    display2 : current.display2,
+                }             
             break;
             case '+':
             case '-':
@@ -233,18 +174,23 @@ export class Calculator extends Component {
             break;
             default:
         }
-        return current;
+        console.log('newMonitors: ', newMonitors)
+        return newMonitors;
     }
 
     resetCalculator() {
+        ToastAndroid.show('RESET', ToastAndroid.SHORT)
         this.setState({            
-            monitor: {
+            history: [
+                monitors = {
                 previousTotal: 0,
                 operator: '',
                 runningToatl: '',
                 display1: '',
-                display2: null,               
-            },            
+                display2: null
+            }
+        ],
+            stepNumber: 0,     
         });
     }
 
@@ -256,7 +202,8 @@ export class Calculator extends Component {
     const runningToatl = monitors.runningToatl;
     const display1 = monitors.display1;
     const display2 = monitors.display2;  
-    console.log('history: ', history)  
+    console.log('history: ', history);
+    console.log('stepNumber: ', this.state.stepNumber);
     
     console.log('---------------------')
     console.log('previousTotal: ', previousTotal, ', typeof: ', typeof(previousTotal));
