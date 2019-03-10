@@ -14,13 +14,16 @@ export class Calculator extends Component {
             {id: 'PER', btn: 'del'}, {id: 'num0', btn: 0}, {id: 'DOT', btn: '.'}, {id: 'EQU', btn: '='},
             ],
         this.state = {           
-              monitor: {
+            history: [
+                monitors = {
                 previousTotal: 0,
                 operator: '',
-                runningToatl: '', 
+                runningToatl: '',
                 display1: '',
-                display2: null,         
-            },                     
+                display2: null
+            }
+        ],
+            stepNumber: 0,                   
         };
     }
 
@@ -28,14 +31,44 @@ export class Calculator extends Component {
 
     handleClick(i) {
         const button = this.buttons[i];
-        const keyType = typeof(button.btn);
-        const keyId = button.id;
-        
-        if(keyType === 'number' || keyId === 'DOT') {
-            this.numberClick(i)
+        const keyValue = button.btn;
+        const isNumber = parseFloat(keyValue);
+        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const current = history[history.length -1];        
+        let previousTotal = current.previousTotal;
+        let operator = current.operator;
+        let runningToatl = current.runningToatl;
+        let display1 = current.display1;
+        let display2 = current.display2;
+
+        if(!isNumber && display1 === '') {
+            return;
+        }
+
+        if(isNumber !== NaN) {
+            this.numberClick(i, current);
         } else {
-            this.operatorClick(i)
+            this.operatorClick(i, current);
         } 
+        
+        this.setState({
+            history: history.concat([                
+                    monitors = {
+                        previousTotal: current.previousTotal,
+                        operator: current.operator,
+                        runningToatl: current.runningToatl,
+                        display1: current.display1,
+                        display2: current.display2,
+                    }
+                
+            ]),
+            stepNumber: history.length,
+        });  
+        // if(keyType === 'number' || keyId === 'DOT') {
+        //     this.numberClick(i)
+        // } else {
+        //     this.operatorClick(i)
+        // } 
     }
 
     updateOperator(i) {
@@ -176,27 +209,21 @@ export class Calculator extends Component {
         });
     }
 
-    numberClick(i) {
+    numberClick(i, current) {
         const button = this.buttons[i];
         const keyValue = button.btn;
-        const monitor = this.state.monitor;        
-        let operator = monitor.operator;
-        let runningToatl = monitor.runningToatl;
-        let previousTotal = monitor.previousTotal;
-        let display1 = monitor.display1;
-        let display2 = monitor.display2;
-
+        let previousTotal = current.previousTotal;
+        let operator = current.operator;
+        let runningToatl = current.runningToatl;
+        let display1 = current.display1;
+        let display2 = current.display2;
         switch(operator) {
             case '':
-                this.setState({
-                    monitor: {
-                        previousTotal: previousTotal,
-                        operator: operator,
-                        runningToatl: runningToatl,
-                        display1: display1 + keyValue,
-                        display2: display2,
-                    },
-                });                
+                current.runningToatl = runningToatl + keyValue;
+                current.operator = operator;
+                current.previousTotal = previousTotal;
+                current.display1 = display1 + keyValue;
+                current.display2 = display2;             
             break;
             case '+':
             case '-':
@@ -206,6 +233,7 @@ export class Calculator extends Component {
             break;
             default:
         }
+        return current;
     }
 
     resetCalculator() {
@@ -221,12 +249,14 @@ export class Calculator extends Component {
     }
 
   render() {
-    const monitor = this.state.monitor;
-    const previousTotal = monitor.previousTotal;
-    const operator = monitor.operator;
-    const runningToatl = monitor.runningToatl;
-    const display1 = monitor.display1;
-    const display2 = monitor.display2;
+    const history = this.state.history;
+    const monitors = history[this.state.stepNumber];
+    const previousTotal = monitors.previousTotal;
+    const operator = monitors.operator;
+    const runningToatl = monitors.runningToatl;
+    const display1 = monitors.display1;
+    const display2 = monitors.display2;  
+    console.log('history: ', history)  
     
     console.log('---------------------')
     console.log('previousTotal: ', previousTotal, ', typeof: ', typeof(previousTotal));
@@ -241,9 +271,8 @@ export class Calculator extends Component {
       <View style={styles.container}>
         <Screen input={display1} style={styles.inputField} />
         <Screen input={display2} />
-        <View style={styles.navBar}>
-        
-        </View>
+        <View style={styles.navBar}>            
+      </View>
         <KeyBoard
           buttons={this.buttons}
           onPress={(i) => this.handleClick(i)}
