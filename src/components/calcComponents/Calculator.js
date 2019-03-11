@@ -30,7 +30,7 @@ export class Calculator extends Component {
     handleClick(i) {
         const button = this.buttons[i];
         const keyValue = button.btn;
-        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const history = this.state.history.slice(0);
         const current = history[history.length -1];
         if(current.display1.length === 0  && typeof(keyValue) !== 'number') {
             return;
@@ -38,6 +38,14 @@ export class Calculator extends Component {
 
         if(keyValue === 'C') {
             this.resetCalculator();
+            return;
+        }
+        if(keyValue === 'del') {
+            let history = this.state.history;
+            history.pop();
+            this.setState({
+                history: history
+            })
             return;
         }
 
@@ -81,8 +89,7 @@ export class Calculator extends Component {
             runningToatl : current.runningToatl,
             display1 : current.display1,
             display2 : current.display2,
-        }
-        
+        }        
         switch(keyValue) {
             case '+':
             case '-':
@@ -109,23 +116,9 @@ export class Calculator extends Component {
                     }
                 }
             break;
-            case 'del':
-                this.delete();
-            break;
             default:
         }
         return newMonitors;
-    }
-
-    delete() {
-        const history = this.state.history;
-        let stepNumber = this.state.stepNumber;
-        history.pop();
-        stepNumber = stepNumber - 1;
-        this.setState({
-            history: history,
-            stepNumber: stepNumber,
-        })
     }
 
     updateTotal(i, current) {
@@ -212,7 +205,7 @@ export class Calculator extends Component {
 
   render() {
     const history = this.state.history;
-    const monitors = history[this.state.stepNumber];
+    const monitors = history[history.length - 1];
     const previousTotal = monitors.previousTotal;
     const operator = monitors.operator;
     const runningToatl = monitors.runningToatl;
