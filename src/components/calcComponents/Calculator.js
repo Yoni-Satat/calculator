@@ -20,7 +20,14 @@ export class Calculator extends Component {
                 operator: '',
                 runningToatl: '',
                 display1: '',
-                display2: null
+                display2: null,
+                parentheses: {
+                    prevTot: 0,
+                    runTot: '',
+                    isOpen: false,
+                    operator: '',
+                    total: 0,
+                },
             }
         ],
             stepNumber: 0,              
@@ -33,13 +40,27 @@ export class Calculator extends Component {
         const history = this.state.history.slice(0);
         const current = history[history.length -1];
         const display1 = current.display1;
+        let newMonitors = {
+            previousTotal: current.previousTotal,
+            operator: current.operator,
+            runningToatl: current.runningToatl,
+            display1: display1,
+            display2: current.display2,
+            parentheses: {
+                prevTot: current.parentheses.prevTot,
+                runTot: current.parentheses.runTot,
+                isOpen: current.parentheses.isOpen,
+                operator: current.parentheses.operator,
+                total: current.parentheses.total,
+            }
+        }
+
         if(display1.length === 0  && typeof(keyValue) !== 'number') {
             return;
         }
 
         if(typeof(keyValue) === 'number' || keyValue === '.') {
-            keyValue = keyValue;
-            const newMonitors = this.numberClick(keyValue, current);
+            newMonitors = this.numberClick(keyValue, current, newMonitors);
             this.setState({
                 history: [...this.state.history, newMonitors],
                 stepNumber: history.length,
@@ -51,10 +72,10 @@ export class Calculator extends Component {
                 break;
                 case 'del':
                     let history = this.state.history;
-                    history.pop();
-                    if(history[history.length -1].operator === '') {
-                        this.state.isOperator = false
+                    if(history.length === 0) {
+                        return;
                     }
+                    history.pop();
                     this.setState({
                         history: history
                     });
@@ -64,22 +85,102 @@ export class Calculator extends Component {
                 case 'x':
                 case '÷':
                     history = this.state.history.slice(0);
-                    console.log('history from operator: ', history)
                     history = this.operatorClick(keyValue, current, history);
                     this.setState({
                         history: history,
                         stepNumber: history.length,
                     })
                 break;
+                case '()':
+                    history = this.state.history.slice(0);
+                    history = this.handleParentheses(keyValue, current, history);
+                    this.setState({
+                        history: history,
+                        stepNumber: history.length,
+                    })                  
+                break;
             }
         }
+    }
+
+    checkDoubleOperator(current) {
+        const lastInDisplay1 = current.display1.slice(-1);
+        let lastInDisplay1IsOperator = false;
+        const operators = ['+', '-', 'x', '÷'];
+        for(let i = 0; i < operators.length; i++) {
+            if(lastInDisplay1 === operators[i]) {
+                lastInDisplay1IsOperator = true
+                return lastInDisplay1IsOperator;
+            }
+        }
+        return lastInDisplay1IsOperator;
+    }
+
+    handleParentheses(keyValue, current, history) {
+        let lastInDisplay1 = current.display1.slice(-1);
+        let isNaN = parseFloat(lastInDisplay1);
+        let isOpen = current.parentheses.isOpen;
+        console.log(history)
+        let newMonitors = {
+            previousTotal : current.previousTotal,
+            operator : current.operator,
+            parentheses: {
+                prevTot: current.parentheses.prevTot,
+                runTot: current.parentheses.runTot,
+                isOpen: current.parentheses.isOpen,
+                operator: current.parentheses.operator,
+                total: current.parentheses.total,
+            },
+            runningToatl : current.runningToatl,
+            display1 : current.display1,
+            display2 : current.display2,
+        }
+        if(isNaN < 0 || isNaN > 0 ) {
+            ToastAndroid.show('Please choose an operator first', ToastAndroid.LONG)
+        } else if(!isOpen) {
+            keyValue = keyValue.slice(0, -1);
+            newMonitors = {
+                previousTotal : current.previousTotal,
+                operator : current.operator,
+                parentheses: {
+                    prevTot: current.parentheses.prevTot,
+                    runTot: current.parentheses.runTot,
+                    isOpen: true,
+                    operator: current.parentheses.operator,
+                    total: current.parentheses.total,
+                },
+                runningToatl : current.runningToatl,
+                display1 : current.display1 + keyValue,
+                display2 : current.display2,
+            }
+        } else {
+            keyValue = keyValue.slice(-1);
+            newMonitors = {
+                previousTotal : current.previousTotal,
+                operator : current.operator,
+                parentheses: {
+                    prevTot: current.parentheses.prevTot,
+                    runTot: current.parentheses.runTot,
+                    isOpen: false,
+                    operator: current.parentheses.operator,
+                    total: current.parentheses.total,
+                },
+                runningToatl : current.runningToatl,
+                display1 : current.display1 + keyValue,
+                display2 : current.display2,
+            }
+        }
+        history = [...history, newMonitors]
+        return history;
     }
 
     updateOperator(keyValue, current) {   
         let updatedMonitors = {
             previousTotal : current.previousTotal,
             operator : current.operator.replace(/.$/, keyValue),
+            parentheses: current.parentheses,
             runningToatl : current.runningToatl,
+            operator: current.parentheses.operator,
             display1 : current.display1.replace(/.$/, keyValue),
             display2 : current.display2,
         }
@@ -88,119 +189,203 @@ export class Calculator extends Component {
 
 
 
-    operatorClick(keyValue, current, history) {
-        const index = history.indexOf(current)
-        const lastInDisplay1 = current.display1.slice(-1);
-        let isLastInDisplay1Operator = false;
-        const operators = ['+', '-', 'x', '÷'];
-        operators.forEach(o => {
-            if(o === lastInDisplay1) {
-                isLastInDisplay1Operator = true;
-                return;
-            }
-        })
-        let display2 = current.display2;
+    operatorClick(keyValue, current, history ,newMonitors) {
+        const index = history.indexOf(current);        
+        const display2 = current.display2;
+        const isOpen = current.parentheses.isOpen;
+        const lastInDisplay1IsOperator =  this.checkDoubleOperator(current);
 
-        let newMonitors = {
-            previousTotal : current.previousTotal,
-            operator : current.operator,
-            runningToatl : current.runningToatl,
-            display1 : current.display1,
-            display2 : current.display2,
-        }
-        if(isLastInDisplay1Operator) {
-            const updated = this.updateOperator(keyValue, current);
-            history[index] = updated;
-        } else if(display2 === null) {
-            newMonitors = {
-                previousTotal: parseFloat(current.runningToatl),
-                operator: keyValue,
-                runningToatl: '',
-                display1: current.display1 + keyValue,
-                display2: current.display2,
-            }
-            history = [...history, newMonitors];
-        } else {                    
-            newMonitors = {
-                previousTotal: display2,
-                operator: keyValue,
-                runningToatl: '',
-                display1: current.display1 + keyValue,
-                display2: null,
-            }
-            history = [...history, newMonitors];
-        }
-        return history;
-    }
-
-    updateTotal(keyValue, current) {
-        let newMonitors = {
-            previousTotal : current.previousTotal,
-            operator : current.operator,
-            runningToatl : current.runningToatl,
-            display1 : current.display1,
-            display2 : current.display2,
-        }
-
-        let runningToatl = current.runningToatl + keyValue;
-        newMonitors.runningToatl = runningToatl;
-        newMonitors.display1 = current.display1 + keyValue
-        switch(current.operator) {
-            case '+':
-            newMonitors.display2 = current.previousTotal + parseFloat(runningToatl);
-            break;
-            case '-':
-            newMonitors.display2 = current.previousTotal - parseFloat(runningToatl);
-            break;
-            case 'x':
-            newMonitors.display2 = current.previousTotal * parseFloat(runningToatl);
-            break;
-            case '÷':
-            newMonitors.display2 = current.previousTotal / parseFloat(runningToatl);
-            break;
-            default:
-            ToastAndroid.show('Incorrect button', ToastAndroid.SHORT);
-        }
-        return newMonitors;
-    }
-
-    numberClick(keyValue, current) {
-        const operator = current.operator;
-        let newMonitors = {
-            previousTotal : current.previousTotal,
-            operator : current.operator,
-            runningToatl : current.runningToatl,
-            display1 : current.display1,
-            display2 : current.display2,
-        }
-        switch(operator) {
-            case '':
+        if(!isOpen) {
+            if(lastInDisplay1IsOperator) {
+                const updated = this.updateOperator(keyValue, current);
+                history[index] = updated;
+            } else if(display2 === null) {
                 newMonitors = {
-                    previousTotal : current.previousTotal,
-                    operator : current.operator,
-                    runningToatl : current.runningToatl + keyValue,
-                    display1 : current.display1 + keyValue,
-                    display2 : current.display2,
-                }          
-            break;
-            case '+':
-            case '-':
-            case 'x':
-            case '÷':
-                newMonitors =  this.updateTotal(keyValue, current);              
-            break;
-            default:
+                    previousTotal: parseFloat(current.runningToatl),
+                    operator: keyValue,
+                    parentheses: {
+                        prevTot: current.parentheses.prevTot,
+                        runTot: current.parentheses.runTot,
+                        isOpen: current.parentheses.isOpen,
+                        operator: current.parentheses.operator,
+                        total: current.parentheses.total,
+                    },
+                    runningToatl: '',
+                    display1: current.display1 + keyValue,
+                    display2: current.display2,
+                }
+                history = [...history, newMonitors];
+            } else {                    
+                newMonitors = {
+                    previousTotal: display2,
+                    operator: keyValue,
+                    parentheses: {
+                        prevTot: current.parentheses.prevTot,
+                        runTot: current.parentheses.runTot,
+                        isOpen: current.parentheses.isOpen,
+                        operator: current.parentheses.operator,
+                        total: current.parentheses.total,
+                    },
+                    runningToatl: '',
+                    display1: current.display1 + keyValue,
+                    display2: null,
+                }
+                history = [...history, newMonitors];
+            }
+            return history;
+        } else {
+            if(lastInDisplay1IsOperator) {
+                const updated = this.updateOperator(keyValue, current);
+                history[index] = updated;
+            } else if(display2 === null) {
+                ToastAndroid.show('Parentheses are open', ToastAndroid.SHORT);
+                prevTot = parseFloat(current.parentheses.runTot);
+                newMonitors = {
+                    previousTotal: display2,
+                    operator: current.operator,
+                    parentheses: {
+                        prevTot: prevTot,
+                        runTot: '',
+                        isOpen: current.parentheses.isOpen,
+                        operator: keyValue,
+                        total: current.parentheses.total,
+                    },
+                    runningToatl: '',
+                    display1: current.display1 + keyValue,
+                    display2: null,
+                }
+                history = [...history, newMonitors];
+            } else {
+                newMonitors = {
+                    previousTotal: current.previousTotal,
+                    operator: current.operator,
+                    runningToatl: current.runningToatl,
+                    display1: current.display1 + keyValue,
+                    display2: null,                    
+                    parentheses: {
+                        prevTot: current.parentheses.total,
+                        runTot: '',
+                        isOpen: current.parentheses.isOpen,
+                        operator: keyValue,
+                        total: 0,
+                    },
+                }
+                history = [...history, newMonitors];
+            }
+            return history;
+        }
+        
+    }
+
+    updateTotal(newMonitors, isOpen) {
+        console.log('update total, new monitors = ', newMonitors)
+
+        if(!isOpen) {
+            let runningToatl = newMonitors.runningToatl;
+            switch(newMonitors.operator) {
+                case '+':
+                newMonitors.display2 = newMonitors.previousTotal + parseFloat(runningToatl);
+                break;
+                case '-':
+                newMonitors.display2 = newMonitors.previousTotal - parseFloat(runningToatl);
+                break;
+                case 'x':
+                newMonitors.display2 = newMonitors.previousTotal * parseFloat(runningToatl);
+                break;
+                case '÷':
+                newMonitors.display2 = newMonitors.previousTotal / parseFloat(runningToatl);
+                break;
+                default:
+                ToastAndroid.show('Incorrect button', ToastAndroid.SHORT);
+            }
+        } else {
+            switch(newMonitors.operator) {
+                case '+':
+                newMonitors.display2 = newMonitors.previousTotal + newMonitors.parentheses.total;
+                break;
+                case '-':
+                newMonitors.display2 = newMonitors.parentheses.prevTot - newMonitors.parentheses.total;
+                break;
+                case 'x':
+                newMonitors.display2 = newMonitors.parentheses.prevTot * newMonitors.parentheses.total;
+                break;
+                case '÷':
+                newMonitors.display2 = newMonitors.parentheses.prevTot / newMonitors.parentheses.total;
+                break;
+                default:
+                ToastAndroid.show('Incorrect button', ToastAndroid.SHORT);                
+            }
+        }            
+        return newMonitors;
+    }
+
+    numberClick(keyValue, current, newMonitors) {
+        const isOpen = current.parentheses.isOpen;
+        console.log(isOpen);
+        
+        if(!isOpen) {
+            switch(current.operator) {
+                case '':
+                    newMonitors.runningToatl = current.runningToatl + keyValue;
+                    newMonitors.display1 =  current.display1 + keyValue;    
+                break;
+                case '+':
+                case '-':
+                case 'x':
+                case '÷':
+                    newMonitors.runningToatl = current.runningToatl + keyValue;
+                    newMonitors.display1 =  current.display1 + keyValue;
+                    newMonitors =  this.updateTotal(newMonitors, isOpen);              
+                break;
+                default:
+            }
+        } else {
+            newMonitors.display1 =  current.display1 + keyValue;
+            let total = current.parentheses.total;
+            let runTot = current.parentheses.runTot + keyValue;
+            newMonitors.parentheses.runTot = runTot;
+            let prevTot = current.parentheses.prevTot;
+            switch(current.parentheses.operator) {
+                case '':                    
+                    total = parseFloat(runTot);
+                    newMonitors.parentheses.total = total;                   
+                    newMonitors = this.updateTotal(newMonitors, isOpen);     
+                break;
+                case '+':
+                    newMonitors.parentheses.total = prevTot + parseFloat(runTot);
+                    newMonitors = this.updateTotal(newMonitors, isOpen);
+                case '-':
+                    newMonitors.parentheses.total = prevTot - parseFloat(runTot);
+                    newMonitors = this.updateTotal(newMonitors, isOpen);
+                break;
+                case 'x':
+                    newMonitors.parentheses.total = prevTot * parseFloat(runTot);
+                    newMonitors = this.updateTotal(newMonitors, isOpen);
+                break;
+                case '÷':
+                    newMonitors.parentheses.total = prevTot / parseFloat(runTot);
+                    newMonitors = this.updateTotal(newMonitors, isOpen);
+                break;
+                default:
+            }
         }
         return newMonitors;
     }
+    
 
     resetCalculator() {
-        ToastAndroid.show('RESET', ToastAndroid.SHORT)
         this.setState({            
             history: [
                 monitors = {
                 previousTotal: 0,
                 operator: '',
+                parentheses: {
+                    prevTot: 0,
+                    runTot: '',
+                    isOpen: false,
+                    operator: '',
+                    total: 0,
+                },
                 runningToatl: '',
                 display1: '',
                 display2: null
@@ -220,7 +405,7 @@ export class Calculator extends Component {
     const display1 = monitors.display1;
     const display2 = monitors.display2;
     console.log('*** from render ***'); 
-    console.log('history: ', history);    
+    console.log('length: ', history.length, 'history: ', history);
     console.log('---------------------')
     console.log('previousTotal: ', previousTotal, ', typeof: ', typeof(previousTotal));
     console.log('operator: ', operator);
