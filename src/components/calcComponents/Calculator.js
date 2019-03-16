@@ -120,10 +120,9 @@ export class Calculator extends Component {
         let lastInDisplay1 = current.display1.slice(-1);
         let isNaN = parseFloat(lastInDisplay1);
         let isOpen = current.parentheses.isOpen;
-        console.log(history)
         let newMonitors = {
-            previousTotal : current.previousTotal,
-            operator : current.operator,
+            previousTotal: current.previousTotal,
+            operator: current.operator,
             parentheses: {
                 prevTot: current.parentheses.prevTot,
                 runTot: current.parentheses.runTot,
@@ -135,7 +134,23 @@ export class Calculator extends Component {
             display1 : current.display1,
             display2 : current.display2,
         }
-        if(isNaN < 0 || isNaN > 0 ) {
+        if(isNaN < 0 || isNaN > 0  && isOpen) {
+            keyValue = keyValue.slice(-1);
+            newMonitors = {
+                previousTotal : current.display2,
+                operator : '',
+                parentheses: {
+                    prevTot: 0,
+                    runTot: '',
+                    isOpen: false,
+                    operator: '',
+                    total: 0,
+                },
+                runningToatl : '',
+                display1 : current.display1 + keyValue,
+                display2 : current.display2,
+            }
+        } else if(isNaN < 0 || isNaN > 0) {
             ToastAndroid.show('Please choose an operator first', ToastAndroid.LONG)
         } else if(!isOpen) {
             keyValue = keyValue.slice(0, -1);
@@ -154,21 +169,7 @@ export class Calculator extends Component {
                 display2 : current.display2,
             }
         } else {
-            keyValue = keyValue.slice(-1);
-            newMonitors = {
-                previousTotal : current.previousTotal,
-                operator : current.operator,
-                parentheses: {
-                    prevTot: current.parentheses.prevTot,
-                    runTot: current.parentheses.runTot,
-                    isOpen: false,
-                    operator: current.parentheses.operator,
-                    total: current.parentheses.total,
-                },
-                runningToatl : current.runningToatl,
-                display1 : current.display1 + keyValue,
-                display2 : current.display2,
-            }
+            ToastAndroid.show('Parentheses cannot be empty', ToastAndroid.LONG)
         }
         history = [...history, newMonitors]
         return history;
@@ -304,13 +305,13 @@ export class Calculator extends Component {
                 newMonitors.display2 = newMonitors.previousTotal + newMonitors.parentheses.total;
                 break;
                 case '-':
-                newMonitors.display2 = newMonitors.parentheses.prevTot - newMonitors.parentheses.total;
+                newMonitors.display2 = newMonitors.previousTotal - newMonitors.parentheses.total;
                 break;
                 case 'x':
-                newMonitors.display2 = newMonitors.parentheses.prevTot * newMonitors.parentheses.total;
+                newMonitors.display2 = newMonitors.previousTotal * newMonitors.parentheses.total;
                 break;
                 case '÷':
-                newMonitors.display2 = newMonitors.parentheses.prevTot / newMonitors.parentheses.total;
+                newMonitors.display2 = newMonitors.previousTotal / newMonitors.parentheses.total;
                 break;
                 default:
                 ToastAndroid.show('Incorrect button', ToastAndroid.SHORT);                
@@ -321,9 +322,9 @@ export class Calculator extends Component {
 
     numberClick(keyValue, current, newMonitors) {
         const isOpen = current.parentheses.isOpen;
-        console.log(isOpen);
-        
-        if(!isOpen) {
+        if(current.display2 === current.previousTotal) {
+            ToastAndroid.show('Please chose operator first', ToastAndroid.LONG)
+        } else if(!isOpen) {
             switch(current.operator) {
                 case '':
                     newMonitors.runningToatl = current.runningToatl + keyValue;
@@ -352,18 +353,23 @@ export class Calculator extends Component {
                     newMonitors = this.updateTotal(newMonitors, isOpen);     
                 break;
                 case '+':
-                    newMonitors.parentheses.total = prevTot + parseFloat(runTot);
+                    total = prevTot + parseFloat(runTot);
+                    newMonitors.parentheses.total = total;
                     newMonitors = this.updateTotal(newMonitors, isOpen);
+                break;
                 case '-':
-                    newMonitors.parentheses.total = prevTot - parseFloat(runTot);
+                    total = prevTot - parseFloat(runTot);
+                    newMonitors.parentheses.total = total;
                     newMonitors = this.updateTotal(newMonitors, isOpen);
                 break;
                 case 'x':
-                    newMonitors.parentheses.total = prevTot * parseFloat(runTot);
+                    total = prevTot * parseFloat(runTot);
+                    newMonitors.parentheses.total = total;
                     newMonitors = this.updateTotal(newMonitors, isOpen);
                 break;
                 case '÷':
-                    newMonitors.parentheses.total = prevTot / parseFloat(runTot);
+                    total = prevTot / parseFloat(runTot);
+                    newMonitors.parentheses.total = total;
                     newMonitors = this.updateTotal(newMonitors, isOpen);
                 break;
                 default:
